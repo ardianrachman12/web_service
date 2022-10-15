@@ -1,4 +1,6 @@
 <?php
+//NAMA 	: MOHAMAD SYIFA ARDIAN R
+//NIM 	: 12201780
 $data=file_get_contents("https://ojk-invest-api.vercel.app/api/illegals");
 $ojk=json_decode($data, true);
 //echo "<pre>";print_r($ojk);

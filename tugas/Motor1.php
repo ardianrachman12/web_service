@@ -42,6 +42,7 @@ class Motor1 extends REST_Controller {
                 }else{
                 $this->db->where('p.id_pembeli', $id);
                 $this->db->join('pembeli AS p','p.id_trans = tr.id_trans','right');
+		$this->db->join('motor AS m','tr.id_motor = m.id_motor','right');
                 $comp = $this->db->get('transaksi AS tr')->result();
                 }
             }

@@ -62,15 +62,85 @@ class Motor1 extends REST_Controller {
     
     //POST transaksi
     function index_post(){
-		$data = array(
-						'id_motor'		=> $this -> post ('id_motor'),
-						'jumlah_unit'		=> $this -> post ('jumlah_unit'));
-		$insert = $this->db->insert('transaksi', $data);
-		if ($insert) {
-			$this->response($data, 200);
-		}else {
-			$this->response(array('status' => 'fail', 502));
-		}
+        $type = $this->post('type');
+        try{
+            if($type == ''){
+                $data = array(
+                    'id_motor'		=> $this -> post ('id_motor'),
+                    'jumlah_unit'		=> $this -> post ('jumlah_unit'));
+                $insert = $this->db->insert('transaksi', $data);
+                if ($insert) {
+                    $result = ["took"=>$_SERVER["REQUEST_TIME_FLOAT"],
+                              "code"=>200,
+                              "message"=>"Response successfully",
+                              "data"=>$data];	
+                        $this->response($result, 200);
+                }else {
+                    $this->response(array('status' => 'fail', 502));
+                }
+            } else if($type == 'pembeli'){
+                $data = array(
+                    'id_pembeli'		=> $this -> post ('id_pembeli'),
+                    'id_trans'		=> $this -> post ('id_trans'),
+                    'nama_pembeli'		=> $this -> post ('nama_pembeli'),
+                    'tgl_trans'		=> $this -> post ('tgl_trans'));
+                $insert = $this->db->insert('pembeli', $data);
+                if ($insert) {
+                    $result = ["took"=>$_SERVER["REQUEST_TIME_FLOAT"],
+                              "code"=>200,
+                              "message"=>"Response successfully",
+                              "data"=>$data];	
+                        $this->response($result, 200);
+                }else {
+                    $this->response(array('status' => 'fail', 502));
+                }
+
+            }
+
+        }catch (Exception $e){
+			$result = ["took"=>$_SERVER["REQUEST_TIME_FLOAT"],
+					  "code"=>401,
+					  "message"=>"Access denied",
+					  "data"=>null];	
+			$this->response($result, 401);
+        }   
     }
+
+    // PUT 
+    function index_put(){
+        $type = $this->put('type');
+        $id = $this ->put('id');
+        try{
+            if($type == ''){
+		        $data = array (
+                    'id_motor'		=> $this -> put ('id_motor'),
+                    'jumlah_unit'		=>$this -> put ('jumlah_unit'));
+                $this->db->where('id_trans', $id);
+                $updt = $this->db->update('transaksi', $data);
+                if ($updt) {
+                $this->response($data, 200);
+                }
+            } else if($type == 'pembeli'){
+                $data = array (
+                    'id_trans'		=> $this -> put ('id_trans'),
+                    'id_pembeli'		=>$this -> put ('id_pembeli'),
+                    'nama_pembeli'		=>$this -> put ('nama_pembeli'),
+                    'tgl_trans'		=>$this -> put ('tgl_trans'));
+                $this->db->where('id_trans', $id);
+                $updt = $this->db->update('pembeli', $data);
+                if ($updt) {
+                $this->response($data, 200);
+                }
+            }
+        }catch (Exception $e){
+			$result = ["took"=>$_SERVER["REQUEST_TIME_FLOAT"],
+					  "code"=>401,
+					  "message"=>"Access denied",
+					  "data"=>null];	
+			$this->response($result, 401);
+        }
+		
+    }
+        	
 }
 ?>

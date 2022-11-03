@@ -46,8 +46,8 @@ class Motor2 extends REST_Controller {
                         $motor[]=[
                             "id_trans"=>$key->id_trans,
                             "_links"=>[(object)["href"=>"motor/{$key->id_motor}",
-												"rel"=>"motor",
-												"type"=>"GET"]],
+				"rel"=>"motor",
+				"type"=>"GET"]],
                             "jumlah_unit"=>$key->jumlah_unit
                         ];
                     endforeach;
@@ -57,8 +57,8 @@ class Motor2 extends REST_Controller {
                     $motor=[
                         "id_trans"=>$comp[0]->id_trans,
                         "_links"=>[(object)["href"=>"motor/{$comp[0]->id_motor}",
-												"rel"=>"motor",
-												"type"=>"GET"]],
+			"rel"=>"motor",
+			"type"=>"GET"]],
                         "jumlah_unit"=>$comp[0]->jumlah_unit
                     ];
                 }

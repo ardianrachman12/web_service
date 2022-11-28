@@ -7,12 +7,15 @@ class Motor2 extends REST_Controller {
 
     function __construct($config = 'rest') {
         parent::__construct($config);	
-        $this->load->database();	     
+        $this->load->driver('cache', array('adapter' => 'apc', 'backup' => 'file'));	     
     }
     public function index_get() {		
 		$type = $this->get('type');
 		$id   = $this->get('id');
         $motor=[]; //array motor
+        $pembeli=[];
+        $transaksi=[];
+        $stok=[];
         try{
             if ($type == ''){ //GET motor
                 if ($id == ''){
@@ -39,6 +42,8 @@ class Motor2 extends REST_Controller {
                         "generasi"=>$comp[0]->generasi
                        ];
                     }
+                    $etag = hash('sha256', $comp[0]->generasi);				 
+                    $this->cache->save($etag, $motor, 300);	
             }elseif($type == 'transaksi'){  //GET transaksi
 				if ($id == ''){
                     $comp = $this->db->get('transaksi')->result();
@@ -46,8 +51,8 @@ class Motor2 extends REST_Controller {
                         $motor[]=[
                             "id_trans"=>$key->id_trans,
                             "_links"=>[(object)["href"=>"motor/{$key->id_motor}",
-				"rel"=>"motor",
-				"type"=>"GET"]],
+												"rel"=>"motor",
+												"type"=>"GET"]],
                             "jumlah_unit"=>$key->jumlah_unit
                         ];
                     endforeach;
@@ -57,11 +62,13 @@ class Motor2 extends REST_Controller {
                     $motor=[
                         "id_trans"=>$comp[0]->id_trans,
                         "_links"=>[(object)["href"=>"motor/{$comp[0]->id_motor}",
-			"rel"=>"motor",
-			"type"=>"GET"]],
+												"rel"=>"motor",
+												"type"=>"GET"]],
                         "jumlah_unit"=>$comp[0]->jumlah_unit
                     ];
                 }
+                $etag = hash('sha256', $comp[0]->jumlah_unit);				 
+                $this->cache->save($etag, $transaksi, 300);	
             }elseif($type == 'stok'){ //GET stok
                 if ($id == ''){
                     $comp = $this->db->get('stok')->result();   
@@ -70,6 +77,8 @@ class Motor2 extends REST_Controller {
                 $this->db->join('stok AS s','s.id_motor = m.id_motor','right');
                 $comp = $this->db->get('motor AS m')->result();
                 }
+                $etag = hash('sha256', $comp[0]->stok_motor);				 
+                $this->cache->save($etag, $stok, 300);	
             }elseif($type == 'pembeli'){ //GET pembeli
                 if ($id == ''){
                     $comp = $this->db->get('pembeli')->result();   
@@ -79,12 +88,20 @@ class Motor2 extends REST_Controller {
                 $this->db->join('motor AS m','tr.id_motor = m.id_motor','right');
                 $comp = $this->db->get('transaksi AS tr')->result();
                 }
-            }
+                $etag = hash('sha256', $comp[0]->tgl_trans);				 
+                $this->cache->save($etag, $pembeli, 300);	
+            }		
+		$this->output->set_header('ETag:'.$etag);	
+		$this->output->set_header('Cache-Control: must-revalidate');	
+		if(isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == $etag) {								
+			$this->output->set_header('HTTP/1.1 304 Not Modified');
+		}else{
         $result = ["took"=>$_SERVER["REQUEST_TIME_FLOAT"],
 					  "code"=>200,
 					  "message"=>"Response successfully",
 					  "data"=>$comp];	
 				$this->response($result, 200);
+        }
 		}catch (Exception $e){
 			$result = ["took"=>$_SERVER["REQUEST_TIME_FLOAT"],
 					  "code"=>401,

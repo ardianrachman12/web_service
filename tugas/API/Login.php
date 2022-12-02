@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH . '/libraries/REST_Controller.php';
 require "vendor\autoload.php";
 
-//use Restserver\Libraries\REST_Controller;
+use Restserver\Libraries\REST_Controller;
 use \Firebase\JWT\JWT;
 
 class Login extends REST_Controller {
